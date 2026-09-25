@@ -8,7 +8,7 @@ docker compose up --build
 - App: http://localhost:3000 · API: http://localhost:8080 · Swagger: http://localhost:8080/swagger-ui.html
 - MySQL is exposed on **3307** (so it doesn't clash with a local MySQL on 3306).
 - Reset everything (including data): `docker compose down -v`
-- Port 8080 busy? Put `BACKEND_PORT=8082` in `.env`.
+- Port 8080 busy? Put `BACKEND_PORT=8082` in `.env`. Port 3307 busy? Set `MYSQL_HOST_PORT`.
 
 ## Option B: Render (cloud)
 

@@ -13,7 +13,7 @@ services:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
       TZ: ${APP_TIMEZONE:-Asia/Kolkata}
     ports:
-      - "3307:3306"   # 3307 on the host so it does not clash with a locally installed MySQL
+      - "${MYSQL_HOST_PORT:-3307}:3306"   # host port; change MYSQL_HOST_PORT if 3307 is taken
     volumes:
       - mysql-data:/var/lib/mysql
     healthcheck:
