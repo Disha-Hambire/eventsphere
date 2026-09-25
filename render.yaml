@@ -1,0 +1,62 @@
+# Render Blueprint: Dashboard > New > Blueprint > select this repository.
+# Render has no managed MySQL, so point DB_URL at an external MySQL (e.g. Aiven free tier) - see docs/DEPLOYMENT.md.
+services:
+  - type: web
+    name: eventsphere-api
+    runtime: docker
+    plan: free
+    dockerContext: ./backend
+    dockerfilePath: ./backend/Dockerfile
+    healthCheckPath: /actuator/health
+    autoDeploy: false          # deploys are triggered by GitHub Actions after CI passes
+    envVars:
+      - key: DB_URL
+        sync: false            # e.g. jdbc:mysql://HOST:PORT/eventsphere?sslMode=REQUIRED
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GEMINI_MODEL
+        value: gemini-2.5-flash
+      - key: CORS_ALLOWED_ORIGINS
+        value: https://eventsphere-web.onrender.com
+      - key: SEED_DEMO_DATA
+        value: "true"
+      - key: APP_TIMEZONE
+        value: Asia/Kolkata
+      - key: PASSWORD_RESET_DEMO_MODE
+        value: "true"          # set to "false" once MAIL_* is configured
+      - key: MAIL_HOST
+        sync: false
+      - key: MAIL_USERNAME
+        sync: false
+      - key: MAIL_PASSWORD
+        sync: false
+      - key: DB_POOL_SIZE
+        value: "5"
+
+  - type: web
+    name: eventsphere-web
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm ci --no-audit --no-fund && npm run build
+    staticPublishPath: dist
+    autoDeploy: false
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          type: web
+          name: eventsphere-api
+          property: host
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    headers:
+      - path: /assets/*
+        name: Cache-Control
+        value: public, max-age=31536000, immutable
