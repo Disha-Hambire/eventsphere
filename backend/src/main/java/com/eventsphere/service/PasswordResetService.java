@@ -7,10 +7,8 @@ import com.eventsphere.repository.PasswordResetTokenRepository;
 import com.eventsphere.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.ObjectProvider;
+import com.eventsphere.service.mail.EmailDelivery;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,7 +23,8 @@ import java.util.Optional;
  * <ol>
  *   <li>Request: always answers the same way (no hint whether the e-mail exists). A random 6-digit code is created,
  *       stored only as a BCrypt hash, valid for 10 minutes; any older open code is invalidated.</li>
- *   <li>Delivery: e-mail via SMTP when configured; otherwise demo mode returns the code so it can be shown on screen.</li>
+ *   <li>Delivery: e-mail via Brevo or SMTP when configured (see {@link com.eventsphere.service.mail.EmailConfig});
+ *       otherwise demo mode returns the code so it can be shown on screen.</li>
  *   <li>Reset: e-mail + code + new password. Max 5 wrong attempts per code, then a new code is required.
  *       The code is burnt on success.</li>
  * </ol>
@@ -43,30 +42,24 @@ public class PasswordResetService {
     private final UserRepository userRepository;
     private final PasswordResetTokenRepository tokenRepository;
     private final PasswordEncoder passwordEncoder;
-    private final ObjectProvider<JavaMailSender> mailSender;
+    private final EmailDelivery emailDelivery;
     private final Clock clock;
     private final SecureRandom random = new SecureRandom();
 
     private final int expiryMinutes;
     private final boolean demoMode;
-    private final boolean mailConfigured;
-    private final String mailFrom;
 
     public PasswordResetService(UserRepository userRepository, PasswordResetTokenRepository tokenRepository,
-                                PasswordEncoder passwordEncoder, ObjectProvider<JavaMailSender> mailSender, Clock clock,
+                                PasswordEncoder passwordEncoder, EmailDelivery emailDelivery, Clock clock,
                                 @Value("${app.password-reset.expiry-minutes}") int expiryMinutes,
-                                @Value("${app.password-reset.demo-mode}") boolean demoMode,
-                                @Value("${spring.mail.host:}") String mailHost,
-                                @Value("${app.mail.from}") String mailFrom) {
+                                @Value("${app.password-reset.demo-mode}") boolean demoMode) {
         this.userRepository = userRepository;
         this.tokenRepository = tokenRepository;
         this.passwordEncoder = passwordEncoder;
-        this.mailSender = mailSender;
+        this.emailDelivery = emailDelivery;
         this.clock = clock;
         this.expiryMinutes = expiryMinutes;
         this.demoMode = demoMode;
-        this.mailConfigured = mailHost != null && !mailHost.isBlank();
-        this.mailFrom = mailFrom;
     }
 
     /** @param message  what to show the user (identical whether or not the account exists)
@@ -90,11 +83,11 @@ public class PasswordResetService {
         String code = "%06d".formatted(random.nextInt(1_000_000));
         tokenRepository.save(new PasswordResetToken(user, passwordEncoder.encode(code), now, now.plusMinutes(expiryMinutes)));
 
-        if (mailConfigured) {
+        if (emailDelivery.isConfigured()) {
             sendEmail(user, code);
             return new ResetRequestResult(message, null);
         }
-        log.warn("No SMTP server configured - password reset code for {}: {}", user.getEmail(), code);
+        log.warn("No e-mail delivery configured - password reset code for {}: {}", user.getEmail(), code);
         return new ResetRequestResult(message, demoMode ? code : null);
     }
 
@@ -127,24 +120,23 @@ public class PasswordResetService {
     }
 
     public boolean isMailConfigured() {
-        return mailConfigured;
+        return emailDelivery.isConfigured();
     }
 
     private void sendEmail(User user, String code) {
-        SimpleMailMessage mail = new SimpleMailMessage();
-        mail.setFrom(mailFrom);
-        mail.setTo(user.getEmail());
-        mail.setSubject("Your EventSphere password reset code: " + code);
-        mail.setText("Hi " + user.getFullName() + ",\n\n"
+        String subject = "Your EventSphere password reset code: " + code;
+        String text = "Hi " + user.getFullName() + ",\n\n"
                 + "Use this code to reset your EventSphere password:\n\n"
                 + "    " + code + "\n\n"
                 + "It expires in " + expiryMinutes + " minutes and can be used once.\n"
-                + "If you didn't ask for this, you can ignore this email; your password stays the same.\n\n- EventSphere");
+                + "If you didn't ask for this, you can ignore this email; your password stays the same.\n\n- EventSphere";
+        String channel = emailDelivery.sender().name();
         try {
-            mailSender.getObject().send(mail);
+            emailDelivery.sender().send(user.getEmail(), user.getFullName(), subject, text);
+            log.info("Password reset code e-mailed to user {} via {}", user.getId(), channel);
         } catch (Exception ex) {
             // Don't reveal delivery problems to the requester; the log tells the operator what went wrong.
-            log.error("Could not send password reset email to user {}: {}", user.getId(), ex.getMessage());
+            log.error("Could not send password reset email to user {} via {}: {}", user.getId(), channel, ex.getMessage());
         }
     }
 }

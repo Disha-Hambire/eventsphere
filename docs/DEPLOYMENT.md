@@ -48,7 +48,8 @@ an external MySQL. Free options: **Aiven for MySQL** (free plan) or **Railway**.
 | `GEMINI_MODEL` | `gemini-2.5-flash` | Model id |
 | `GEMINI_TIMEOUT_SECONDS` | `30` | AI call timeout |
 | `MAIL_HOST` / `MAIL_PORT` / `MAIL_USERNAME` / `MAIL_PASSWORD` | empty / `587` | SMTP for reset e-mails (e.g. Gmail + app password) |
-| `MAIL_FROM` | `EventSphere <no-reply@eventsphere.app>` | Sender address |
+| `MAIL_FROM` | `EventSphere <no-reply@eventsphere.app>` | Sender address (with Brevo: a verified sender) |
+| `BREVO_API_KEY` | empty | Send e-mail via Brevo's HTTPS API; takes priority over SMTP. **Required on Render's free plan, which blocks SMTP ports 25/465/587** |
 | `PASSWORD_RESET_DEMO_MODE` | `true` | Without SMTP, show the reset code on screen. **Set `false` on a public site** |
 | `PASSWORD_RESET_EXPIRY_MINUTES` | `10` | Reset code lifetime |
 | `BACKEND_PORT` (docker-compose) | `8080` | Host port for the API container |
@@ -75,6 +76,7 @@ an external MySQL. Free options: **Aiven for MySQL** (free plan) or **Railway**.
 | Refreshing `/events/3` gives 404 on Render/nginx | SPA routing | Keep the rewrite `/* → /index.html` (in `render.yaml` and `nginx.conf`) |
 | First request on Render takes ~50 s | Free instance sleeping | Expected on the free plan; open the app a minute before the demo |
 | AI shows "built-in writer/analyser" | No/invalid key, quota or timeout | Check `GEMINI_API_KEY`; server log shows `Gemini call failed … 401/429` |
+| Reset e-mail never arrives on Render free plan | Free web services block SMTP ports | Use `BREVO_API_KEY` (HTTPS) instead of `MAIL_HOST` |
 | Reset e-mail never arrives | SMTP not configured or rejected | Check the server log (`Could not send password reset email…`); for Gmail use an *app password*, not your normal password |
 | QR scanner: "Camera unavailable" | No permission or page not on HTTPS | Allow camera; browsers only allow cameras on `https://` or `localhost`. Use manual code entry as fallback |
 | Times off by hours in the cloud | Server runs in UTC | Set `APP_TIMEZONE` (defaults to Asia/Kolkata) |

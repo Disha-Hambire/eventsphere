@@ -30,12 +30,11 @@ services:
         value: Asia/Kolkata
       - key: PASSWORD_RESET_DEMO_MODE
         value: "true"          # set to "false" once MAIL_* is configured
-      - key: MAIL_HOST
+      # Render's free plan blocks SMTP ports, so send e-mail through Brevo's HTTPS API instead
+      - key: BREVO_API_KEY
         sync: false
-      - key: MAIL_USERNAME
-        sync: false
-      - key: MAIL_PASSWORD
-        sync: false
+      - key: MAIL_FROM
+        sync: false            # e.g. EventSphere <you@gmail.com> (verified sender in Brevo)
       - key: DB_POOL_SIZE
         value: "5"
 
