@@ -88,6 +88,17 @@ public class ReportService {
         List<Integer> ratings = new ArrayList<>();
         Map<String, Long> byCategory = new TreeMap<>();
 
+        // Batch-load all numbers up front: a fixed handful of queries however many events there are.
+        List<Long> ids = events.stream().map(Event::getId).toList();
+        Map<Long, EventMapper.Counts> counts = mapper.counts(ids);
+        Map<Long, long[]> attendance = new HashMap<>(); // eventId -> [checkIns, distinctAttendees]
+        if (!ids.isEmpty()) {
+            for (Object[] row : attendanceRepository.statsByEventIds(ids)) {
+                attendance.put((Long) row[0], new long[]{(Long) row[1], (Long) row[2]});
+            }
+            ratings.addAll(feedbackRepository.findRatingsByEventIds(ids));
+        }
+
         for (Event e : events) {
             String phase = EventMapper.phase(e, now);
             switch (phase) {
@@ -98,18 +109,18 @@ public class ReportService {
                 default -> { }
             }
             byCategory.merge(e.getCategory().name(), 1L, Long::sum);
-            long confirmed = registrationRepository.countByEventIdAndStatus(e.getId(), RegistrationStatus.CONFIRMED);
-            long wl = registrationRepository.countByEventIdAndStatus(e.getId(), RegistrationStatus.WAITLISTED);
-            registrations += confirmed + wl;
-            waitlisted += wl;
-            checkIns += attendanceRepository.countByEventId(e.getId());
+            EventMapper.Counts c = counts.getOrDefault(e.getId(), new EventMapper.Counts(0, 0, 0));
+            long[] att = attendance.getOrDefault(e.getId(), new long[2]);
+            long confirmed = c.confirmed();
+            registrations += confirmed + c.waitlisted();
+            waitlisted += c.waitlisted();
+            checkIns += att[0];
             if (e.getStatus() == EventStatus.COMPLETED && confirmed > 0) {
-                attendanceRates.add(attendanceRepository.countDistinctAttendeesByEventId(e.getId()) * 100.0 / confirmed);
+                attendanceRates.add(att[1] * 100.0 / confirmed);
             }
             if (e.getStatus() == EventStatus.PUBLISHED || e.getStatus() == EventStatus.COMPLETED) {
                 top.add(new TopEvent(e.getId(), e.getTitle(), confirmed, e.getCapacity(), pct(confirmed, e.getCapacity())));
             }
-            feedbackRepository.findByEventIdOrderBySubmittedAtDesc(e.getId()).forEach(f -> ratings.add(f.getRating()));
         }
 
         LocalDateTime since = now.toLocalDate().minusDays(TREND_DAYS - 1L).atStartOfDay();
@@ -124,12 +135,11 @@ public class ReportService {
             trend.add(new TrendPoint(d, perDay.getOrDefault(d, 0L)));
         }
 
-        List<EventDtos.EventDto> upcomingList = events.stream()
+        List<EventDtos.EventDto> upcomingList = mapper.toDtos(events.stream()
                 .filter(e -> e.getStatus() == EventStatus.PUBLISHED && e.getEndDateTime().isAfter(now))
                 .sorted(Comparator.comparing(Event::getStartDateTime))
                 .limit(5)
-                .map(e -> mapper.toDto(e, now))
-                .toList();
+                .toList(), now);
 
         return new Dashboard(events.size(), draft, upcoming, live, completed, registrations, waitlisted, checkIns,
                 round(attendanceRates.stream().mapToDouble(Double::doubleValue).average().orElse(0)),

@@ -80,18 +80,18 @@ public class EventService {
                     .sorted(Comparator.comparing(Event::getStartDateTime).reversed());
             filtered = Stream.concat(upcoming, past).toList();
         }
-        return filtered.stream().map(e -> mapper.toDto(e, now)).toList();
+        return mapper.toDtos(filtered, now);
     }
 
     /** Public landing page: next published events that still accept registrations. */
     @Transactional(readOnly = true)
     public List<EventDto> featured(int limit) {
         LocalDateTime now = now();
-        return eventRepository.findByStatusInOrderByStartDateTimeAsc(List.of(EventStatus.PUBLISHED)).stream()
+        List<Event> events = eventRepository.findByStatusInOrderByStartDateTimeAsc(List.of(EventStatus.PUBLISHED)).stream()
                 .filter(e -> e.getEndDateTime().isAfter(now))
                 .limit(limit)
-                .map(e -> mapper.toDto(e, now))
                 .toList();
+        return mapper.toDtos(events, now);
     }
 
     @Transactional(readOnly = true)

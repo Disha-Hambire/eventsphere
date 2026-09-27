@@ -3,6 +3,7 @@ package com.eventsphere.repository;
 import com.eventsphere.entity.Event;
 import com.eventsphere.entity.EventStatus;
 import jakarta.persistence.LockModeType;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
@@ -22,10 +23,13 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     @Query("select e from Event e where e.id = :id")
     Optional<Event> findByIdForUpdate(@Param("id") Long id);
 
+    @EntityGraph(attributePaths = "organizer")
     List<Event> findAllByOrderByStartDateTimeDesc();
 
+    @EntityGraph(attributePaths = "organizer")
     List<Event> findByOrganizerIdOrderByStartDateTimeDesc(Long organizerId);
 
+    @EntityGraph(attributePaths = "organizer")
     List<Event> findByStatusInOrderByStartDateTimeAsc(Collection<EventStatus> statuses);
 
     long countByStatus(EventStatus status);

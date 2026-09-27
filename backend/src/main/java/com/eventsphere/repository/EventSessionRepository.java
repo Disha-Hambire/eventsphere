@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 
 public interface EventSessionRepository extends JpaRepository<EventSession, Long> {
@@ -15,6 +16,10 @@ public interface EventSessionRepository extends JpaRepository<EventSession, Long
     long countByEventId(Long eventId);
 
     long countBySpeakerId(Long speakerId);
+
+    /** Rows of [eventId, sessionCount] for many events in one query. */
+    @Query("select s.event.id, count(s) from EventSession s where s.event.id in :eventIds group by s.event.id")
+    List<Object[]> countByEventIds(@Param("eventIds") Collection<Long> eventIds);
 
     /** R9: sessions of the same speaker that overlap [start, end) in any active (draft/published) event. */
     @Query("""

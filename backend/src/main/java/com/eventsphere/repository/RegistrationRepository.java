@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -47,6 +48,10 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
                                                 @Param("eventId") Long eventId,
                                                 @Param("start") LocalDateTime start,
                                                 @Param("end") LocalDateTime end);
+
+    /** One round trip for many events: rows of [eventId, status, count]. */
+    @Query("select r.event.id, r.status, count(r) from Registration r where r.event.id in :eventIds group by r.event.id, r.status")
+    List<Object[]> countByEventAndStatus(@Param("eventIds") Collection<Long> eventIds);
 
     @Query("select r.registeredAt from Registration r where r.registeredAt >= :since")
     List<LocalDateTime> findRegistrationTimesSince(@Param("since") LocalDateTime since);
