@@ -75,6 +75,11 @@ that is **full with a waitlist**, an open corporate summit, a draft ready to pub
 **completed** conference with attendance and feedback.
 
 ### Password reset e-mails (optional)
+Easiest on Windows: create a Gmail *app password* (https://myaccount.google.com/apppasswords, needs 2-Step
+Verification), then run `powershell -ExecutionPolicy Bypass -File .un-backend.ps1`. It asks for your MySQL
+password, Gmail address and app password (typed hidden, never saved) and starts the backend with e-mail on.
+
+Manual setup:
 Set `MAIL_HOST`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD` (e.g. Gmail with an app password). Without them,
 demo mode shows the reset code on screen after *Forgot password?*.
 
