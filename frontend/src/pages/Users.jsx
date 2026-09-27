@@ -6,6 +6,7 @@ import { useToast } from '../context/ToastContext'
 import { fmtDate } from '../lib/format'
 import { Avatar, Badge, Card, PageHeader, PageLoader, StatCard } from '../components/ui'
 import { CalendarCheck2, UserRound, Users as UsersIcon } from 'lucide-react'
+import OrganizerRequestsPanel from '../components/OrganizerRequestsPanel'
 
 export default function Users() {
   const { user: me } = useAuth()
@@ -14,8 +15,10 @@ export default function Users() {
   const [query, setQuery] = useState('')
   const [pending, setPending] = useState(null)
 
+  const loadUsers = () => api.get('/admin/users').then(setUsers).catch((e) => toast.error(e.message))
+
   useEffect(() => {
-    api.get('/admin/users').then(setUsers).catch((e) => toast.error(e.message))
+    loadUsers()
   }, [])
 
   const replace = (u) => setUsers((list) => list.map((x) => (x.id === u.id ? u : x)))
@@ -55,13 +58,15 @@ export default function Users() {
   return (
     <>
       <PageHeader eyebrow="Administration" title="Users & roles"
-        subtitle="Participants sign up themselves; promote trusted people to organizer so they can run events." />
+        subtitle="Participants sign up themselves and can request organizer access. Approve requests below, or change any role directly." />
 
       <div className="mb-6 grid gap-4 sm:grid-cols-3">
         <StatCard icon={ShieldCheck} label="Admins" value={count('ADMIN')} tone="fuchsia" />
         <StatCard icon={CalendarCheck2} label="Organizers" value={count('ORGANIZER')} delay={0.05} />
         <StatCard icon={UserRound} label="Participants" value={count('PARTICIPANT')} tone="sky" delay={0.1} />
       </div>
+
+      <OrganizerRequestsPanel onDecided={loadUsers} />
 
       <div className="relative mb-4 max-w-sm">
         <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />

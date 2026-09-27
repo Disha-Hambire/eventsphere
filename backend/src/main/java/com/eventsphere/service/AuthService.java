@@ -1,5 +1,6 @@
 package com.eventsphere.service;
 
+import com.eventsphere.config.AccountBootstrap;
 import com.eventsphere.dto.AuthDtos.AuthResponse;
 import com.eventsphere.dto.AuthDtos.LoginRequest;
 import com.eventsphere.dto.AuthDtos.RegisterRequest;
@@ -21,16 +22,19 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final AccountBootstrap accounts;
 
-    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtService jwtService) {
+    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtService jwtService,
+                       AccountBootstrap accounts) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
+        this.accounts = accounts;
     }
 
     /**
-     * Self sign-up always creates a PARTICIPANT. Organizer rights are granted by an admin,
-     * so nobody can publish events on the platform without being vetted.
+     * Self sign-up creates a PARTICIPANT (organizer rights come from an approved organizer request), except for
+     * addresses listed in ADMIN_EMAILS, which become the platform admins.
      */
     @Transactional
     public AuthResponse register(RegisterRequest req) {
@@ -38,7 +42,8 @@ public class AuthService {
         if (userRepository.existsByEmailIgnoreCase(email)) {
             throw new ConflictException("An account with this email already exists. Please log in.");
         }
-        User user = new User(req.fullName().trim(), email, passwordEncoder.encode(req.password()), Role.PARTICIPANT);
+        Role role = accounts.isAdminEmail(email) ? Role.ADMIN : Role.PARTICIPANT;
+        User user = new User(req.fullName().trim(), email, passwordEncoder.encode(req.password()), role);
         user.setPhone(blankToNull(req.phone()));
         user.setOrganization(blankToNull(req.organization()));
         userRepository.save(user);

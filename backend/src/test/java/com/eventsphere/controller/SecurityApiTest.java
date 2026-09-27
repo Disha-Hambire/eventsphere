@@ -82,6 +82,21 @@ class SecurityApiTest {
     }
 
     @Test
+    void roleChangesApplyWithoutLoggingInAgain() throws Exception {
+        String token = login("pat@test.com", "secret123");
+        mvc.perform(get("/api/dashboard").header("Authorization", "Bearer " + token)).andExpect(status().isForbidden());
+
+        User pat = users.findByEmailIgnoreCase("pat@test.com").orElseThrow();
+        pat.setRole(Role.ORGANIZER);
+        users.saveAndFlush(pat);
+        mvc.perform(get("/api/dashboard").header("Authorization", "Bearer " + token)).andExpect(status().isOk());
+
+        pat.setActive(false);
+        users.saveAndFlush(pat);
+        mvc.perform(get("/api/dashboard").header("Authorization", "Bearer " + token)).andExpect(status().isForbidden());
+    }
+
+    @Test
     void signUpCreatesParticipantAndValidatesInput() throws Exception {
         mvc.perform(post("/api/auth/register").contentType(MediaType.APPLICATION_JSON)
                         .content(json.writeValueAsString(Map.of("fullName", "New", "email", "bad", "password", "123"))))

@@ -53,6 +53,9 @@ an external MySQL. Free options: **Aiven for MySQL** (free plan) or **Railway**.
 | `PASSWORD_RESET_DEMO_MODE` | `true` | Without SMTP, show the reset code on screen. **Set `false` on a public site** |
 | `PASSWORD_RESET_EXPIRY_MINUTES` | `10` | Reset code lifetime |
 | `BACKEND_PORT` (docker-compose) | `8080` | Host port for the API container |
+| `ADMIN_EMAILS` | empty | Comma-separated e-mails that become admins (at startup and at sign-up); no password handling |
+| `DISABLE_DEMO_ACCOUNTS` | `false` | `true` deactivates the demo accounts (their passwords are public); demo events stay |
+| `VITE_SHOW_DEMO` (frontend build) | empty | `true` shows one-click demo logins in a production build (always shown in `npm run dev`) |
 | `SEED_DEMO_DATA` | `true` | Seed demo data when the DB is empty |
 | `APP_TIMEZONE` | `Asia/Kolkata` | Zone for event times |
 | `PORT` | `8080` | HTTP port (Render sets it) |

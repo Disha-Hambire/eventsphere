@@ -12,6 +12,7 @@ import MyTickets from './pages/MyTickets'
 import CheckIn from './pages/CheckIn'
 import Speakers from './pages/Speakers'
 import Users from './pages/Users'
+import BecomeOrganizer from './pages/BecomeOrganizer'
 import NotFound from './pages/NotFound'
 import { homeFor } from './lib/nav'
 
@@ -44,6 +45,7 @@ export default function App() {
         <Route path="/tickets" element={<RequireAuth roles={['PARTICIPANT']}><MyTickets /></RequireAuth>} />
         <Route path="/check-in" element={<RequireAuth roles={MANAGERS}><CheckIn /></RequireAuth>} />
         <Route path="/speakers" element={<RequireAuth roles={MANAGERS}><Speakers /></RequireAuth>} />
+        <Route path="/become-organizer" element={<RequireAuth roles={['PARTICIPANT', 'ORGANIZER']}><BecomeOrganizer /></RequireAuth>} />
         <Route path="/users" element={<RequireAuth roles={['ADMIN']}><Users /></RequireAuth>} />
       </Route>
 

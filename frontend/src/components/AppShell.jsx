@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'motion/react'
 import {
-  CalendarDays, LayoutDashboard, LogOut, Menu, Mic2, ScanLine, ShieldCheck, Ticket, X, Compass,
+  BadgeCheck, CalendarDays, LayoutDashboard, LogOut, Menu, Mic2, ScanLine, ShieldCheck, Ticket, X, Compass,
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { Backdrop, Brand } from './Brand'
@@ -14,6 +14,7 @@ function navFor(role) {
     return [
       { to: '/events', label: 'Discover events', icon: Compass },
       { to: '/tickets', label: 'My tickets', icon: Ticket },
+      { to: '/become-organizer', label: 'Become an organizer', icon: BadgeCheck },
     ]
   }
   const items = [

@@ -63,7 +63,10 @@ UI http://localhost:3000 · API http://localhost:8080
 > **Port 8080 busy?** Run the API with `PORT=8081` (PowerShell: `$env:PORT=8081`) and create
 > `frontend/.env.local` containing `VITE_PROXY_TARGET=http://localhost:8081`.
 
-### Demo accounts (one-click buttons on the login page)
+### Demo accounts (one-click buttons on the login page, local development only)
+> On a public deployment set `DISABLE_DEMO_ACCOUNTS=true` (these passwords are public) and `ADMIN_EMAILS=<your email>`;
+> the one-click buttons are hidden automatically in production builds.
+
 | Role | Email | Password |
 |---|---|---|
 | Admin | admin@eventsphere.com | Admin@123 |
@@ -76,7 +79,8 @@ that is **full with a waitlist**, an open corporate summit, a draft ready to pub
 
 ### Password reset e-mails (optional)
 Easiest on Windows: create a Gmail *app password* (https://myaccount.google.com/apppasswords, needs 2-Step
-Verification), then run `powershell -ExecutionPolicy Bypass -File .un-backend.ps1`. It asks for your MySQL
+Verification), then run `powershell -ExecutionPolicy Bypass -File .
+un-backend.ps1`. It asks for your MySQL
 password, Gmail address and app password (typed hidden, never saved) and starts the backend with e-mail on.
 
 Manual setup:

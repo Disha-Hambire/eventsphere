@@ -32,7 +32,11 @@ paper sign-in sheets and Google Forms. That causes:
 **Forgot password:** the user enters their e-mail and receives a 6-digit code (valid 10 min, single use, locked
 after 5 wrong attempts). The screen shows the same message whether or not the e-mail is registered.
 
-*Why organizers are promoted, not self-registered:* anyone publishing events on the platform should be vetted.
+**Becoming an organizer:** a participant opens *Become an organizer* and submits a short reason. Admins get an
+e-mail; in *Users & roles* they approve (the role becomes ORGANIZER immediately) or reject with a note. Only one
+request can be pending at a time; after a rejection the participant may apply again.
+
+*Why organizers are approved, not self-registered:* anyone publishing events on the platform should be vetted.
 
 ## 3. End-to-end process
 

@@ -8,6 +8,7 @@ import {
 import { api } from '../lib/api'
 import { useAuth } from '../context/AuthContext'
 import { homeFor } from '../lib/nav'
+import { SHOW_DEMO } from '../lib/demo'
 import { Backdrop, Brand } from '../components/Brand'
 import ThemeToggle from '../components/ThemeToggle'
 import EventCard from '../components/EventCard'
@@ -72,7 +73,7 @@ export default function Landing() {
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.24, duration: 0.6 }}
           className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
           <Link to={cta.to}><Button size="lg" icon={ArrowRight} className="flex-row-reverse">{cta.label}</Button></Link>
-          {!user && <Link to="/login"><Button size="lg" variant="secondary">Try the demo</Button></Link>}
+          {!user && <Link to="/login"><Button size="lg" variant="secondary">{SHOW_DEMO ? 'Try the demo' : 'Log in'}</Button></Link>}
         </motion.div>
 
         {/* Lifecycle strip */}

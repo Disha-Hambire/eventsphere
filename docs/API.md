@@ -90,6 +90,16 @@ Categories: `CONFERENCE, CORPORATE, COLLEGE, WORKSHOP, MEETUP, WEBINAR, CULTURAL
 |---|---|---|---|
 | POST | `/ai/event-description` | organizer, admin | `{title, category, venue, audience, highlights, tone}` → `{text, source: GEMINI\|FALLBACK}` |
 
+## Organizer requests
+| Method | Path | Who | Description |
+|---|---|---|---|
+| POST | `/organizer-requests` | participant | `{organization, reason}`: apply to become an organizer (one pending at a time) |
+| GET | `/organizer-requests/my` | any | My latest request (204 if none) |
+| GET | `/admin/organizer-requests?status=PENDING\|APPROVED\|REJECTED\|ALL` | admin | List requests |
+| GET | `/admin/organizer-requests/count` | admin | `{pending}` |
+| POST | `/admin/organizer-requests/{id}/approve` | admin | `{note?}`: applicant becomes ORGANIZER immediately |
+| POST | `/admin/organizer-requests/{id}/reject` | admin | `{note?}`: applicant is told and may apply again |
+
 ## Speakers & users
 | Method | Path | Who | Description |
 |---|---|---|---|

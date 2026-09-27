@@ -32,17 +32,21 @@ export function AuthProvider({ children }) {
 
   const register = useCallback((form) => api.post('/auth/register', form).then(acceptAuth), [acceptAuth])
 
+  // Re-read the user (e.g. after an admin approves an organizer request, the role changes)
+  const refreshUser = useCallback(() => api.get('/auth/me').then((u) => { setUser(u); return u }), [])
+
   const value = useMemo(() => ({
     user,
     loading,
     login,
     register,
     logout,
+    refreshUser,
     isAdmin: user?.role === 'ADMIN',
     isOrganizer: user?.role === 'ORGANIZER',
     isParticipant: user?.role === 'PARTICIPANT',
     canManage: user?.role === 'ADMIN' || user?.role === 'ORGANIZER',
-  }), [user, loading, login, register, logout])
+  }), [user, loading, login, register, logout, refreshUser])
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

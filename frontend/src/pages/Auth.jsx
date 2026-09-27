@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext'
 import { api } from '../lib/api'
 import { useToast } from '../context/ToastContext'
 import { homeFor } from '../lib/nav'
+import { SHOW_DEMO } from '../lib/demo'
 import { Backdrop, Brand } from '../components/Brand'
 import ThemeToggle from '../components/ThemeToggle'
 import { Button, Card, Field } from '../components/ui'
@@ -66,7 +67,7 @@ export function Login() {
 
   return (
     <AuthLayout title="Welcome back" subtitle="Log in to manage or attend events."
-      footer={
+      footer={SHOW_DEMO && (
         <Card className="mt-4 p-5">
           <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">One-click demo accounts</p>
           <div className="grid grid-cols-3 gap-2">
@@ -80,7 +81,7 @@ export function Login() {
             ))}
           </div>
         </Card>
-      }>
+      )}>
       <form onSubmit={submit} className="space-y-4">
         <Field label="Email">
           <input className="input" type="email" autoComplete="email" required value={form.email}
