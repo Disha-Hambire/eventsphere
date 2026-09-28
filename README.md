@@ -145,4 +145,5 @@ Event-Management-Website/
 | [SRS-IEEE.md](docs/SRS-IEEE.md) | IEEE-830 style requirements with test traceability |
 | [API.md](docs/API.md) | All REST endpoints |
 | [DEPLOYMENT.md](docs/DEPLOYMENT.md) | Docker, Render, environment variables, production troubleshooting |
+| [DATABASE-WALKTHROUGH.md](docs/DATABASE-WALKTHROUGH.md) | MySQL queries to show in the interview, and what each one proves |
 | [AI-USAGE.md](docs/AI-USAGE.md) | AI tools, prompts, design decisions, learnings, demo script |
