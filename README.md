@@ -103,7 +103,7 @@ Without it, the AI buttons still work using the built-in generator (labelled in 
 cd backend
 mvn test
 ```
-37 automated tests cover every business rule (registration/waitlist, scheduling clashes, lifecycle, check-in,
+47 automated tests cover every business rule (registration/waitlist, scheduling clashes, lifecycle, check-in,
 feedback eligibility, password reset, security, AI fallback). CI runs them on every push.
 
 ## Project structure

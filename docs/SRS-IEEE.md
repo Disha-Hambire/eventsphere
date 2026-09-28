@@ -152,4 +152,4 @@ Single organisation; free events; local wall-clock time zone; Gemini is optional
 | FR-1-3, NFR-1-2 | `SecurityApiTest.*` |
 | FR-2a password reset | `PasswordResetServiceTest.*` |
 
-Run all: `cd backend && mvn test` (37 tests).
+Run all: `cd backend && mvn test` (47 tests).
